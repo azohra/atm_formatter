@@ -5,7 +5,7 @@ require 'tmj_formatter/version'
 
 Gem::Specification.new do |spec|
   spec.name          = 'tmj_formatter'
-  spec.version       = TmjFormatter::VERSION
+  spec.version       = TMJFormatter::VERSION
   spec.authors       = ['frbk']
   spec.email         = ['']
 

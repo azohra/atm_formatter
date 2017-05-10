@@ -1,5 +1,6 @@
-# Rspec Formatter For Test Managemt For JIRA 
-[![Build Status](https://travis-ci.org/frbk/tmj_formatter.svg?branch=master)](https://travis-ci.org/frbk/tmj_formatter)
+# Rspec Formatter For Test Managemt For JIRA
+[![Gem Version](https://badge.fury.io/rb/tmj_formatter.svg)](https://badge.fury.io/rb/tmj_formatter)
+[![Build Status](https://travis-ci.org/automation-wizards/tmj_formatter.svg?branch=master)](https://travis-ci.org/frbk/tmj_formatter)
 
 Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/tmj_formatter`. To experiment with that code, run `bin/console` for an interactive prompt.
 

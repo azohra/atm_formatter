@@ -1,5 +1,14 @@
 sudo: false
 language: ruby
 rvm:
-  - 2.4.1
+- 2.4.1
 before_install: gem install bundler -v 1.14.6
+deploy:
+  provider: rubygems
+  api_key:
+    secure: FD094gf79fXIEokEmgUzYpjH504oT/D6IfF+TclBliOgxx4Ksr7rMXxQF9RCjGaQxgNxPww3i9RlzPbbL0uPCcghq8aRhmWdTcuUJf2vtmgXFXoo49i6DoguwjLKojxNWmlczqzL9P3BTpXL9G2udwlKSvbzBn2MJ+cIl450qUoXSh63VclM5FHPYA57xStB5WUJfOtDzJ6k6kjnDbmOk1+//4+fnnVb6G19LsxOQdE10r3jovGP7pkdH4ukuftiJoyr+QmRX8vvePEbq93CakwypCXkZRThWqtB9LD9gGiFFe5S7HlKQDfujI+wX54rpIO1PspJvMNbT31Ylnv3urd0FTctrqBA2Z5MEpJGC73AG4LsEI7xpifwUgE3lUFKu2aLwzIFvpraypj7OPRUC2NQ8S/fzgJ4+an4oUmp7AtNOErh86hh7hGb0ZWlCOmwDazklrioaDweTeyqTusNOKIC5/gnue84EOC2POJGKfMX9RjqV1eEMStMHs6GI+vEBqjUEeV01ruB/QwhNo/KDFHJLFkt5+pb2CO/fF6E43lhsezK94+GHETFr805ExSLoswo+dKeVjLzGoUz2SVTOw8L/toe10KCrrMCxcboec+aRZ8HHPJH8JiVUzXrk7BtVlJi9qqWNrcKtcm+lpVdVcd3RJwWU2sQMlmkEVEg7hk=
+  gem: tmj_formatter
+  on:
+    tags: true
+    repo: automation-wizards/tmj_formatter
+    branch: master

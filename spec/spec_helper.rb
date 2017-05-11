@@ -23,7 +23,7 @@ RSpec.configure do |config|
   config.formatter = 'TMJResultFormatter'
   config.formatter = 'TMJOutputFormatter'
 
-  config.tmj_result_formatter_options = { run_only_found_tests: true, post_results: true }
+  config.tmj_result_formatter_options = { run_only_found_tests: true, post_results: false }
 
   config.expect_with :rspec do |c|
     c.syntax = :expect

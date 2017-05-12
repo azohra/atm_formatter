@@ -5,10 +5,6 @@
 [![Inline docs](http://inch-ci.org/github/automation-wizards/tmj_formatter.svg?branch=master)](http://inch-ci.org/github/automation-wizards/tmj_formatter)
 [![Dependency Status](https://gemnasium.com/badges/github.com/automation-wizards/tmj_formatter.svg)](https://gemnasium.com/github.com/automation-wizards/tmj_formatter)
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/tmj_formatter`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
-
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -27,7 +23,24 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+#### Configuration
+
+Configure `tmj_ruby` (instructions can be found [here](https://github.com/automation-wizards/tmj_ruby))
+
+Add result/output formatter, options and adapter in spec_helper
+```ruby
+RSpec.configure do |config|
+  config.include TMJFormatter::Adaptor
+  config.formatter = 'TMJResultFormatter'
+  config.formatter = 'TMJOutputFormatter'
+  
+  config.tmj_result_formatter_options = { run_only_found_tests: true, post_results: true }
+end
+```
+By default all of the options are set to false.
+`run_only_found_tests` option will force formatter to only run tests from test run.
+`post_results` option enables/disable the ability to post the test results.
+
 
 ## Development
 

@@ -5,7 +5,7 @@ RSpec.configuration.add_setting :tmj_result_formatter_options, default: {}
 class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
   DEFAULT_PROGRESS_BAR_OPTIONS = { run_only_found_tests: false, post_results: false }.freeze
 
-  RSpec::Core::Formatters.register self, :start, :example_started, :example_passed, :example_failed, :example_pending
+  RSpec::Core::Formatters.register self, :start, :example_started, :example_passed, :example_failed
 
   def initialize(output)
     @output = output
@@ -22,7 +22,7 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
 
   def example_started(notification)
      if @options[:run_only_found_tests] && !@test_cases.include?(test_id(notification.example))
-       notification.example.metadata[:pending] = true
+       notification.example.metadata[:skip] = true
      end
     notification.example.metadata[:step_index] = 0
   end
@@ -32,10 +32,6 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
   end
 
   def example_failed(notification)
-    post_result(notification.example) if @options[:run_only_found_tests]
-  end
-
-  def example_pending(notification) # TODO: get this to work
     post_result(notification.example) if @options[:run_only_found_tests]
   end
 

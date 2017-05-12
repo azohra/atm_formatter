@@ -1,4 +1,4 @@
-# Rspec Formatter For Test Managemt For JIRA
+# Rspec Formatter For Test Managemt For JIRA 
 [![Gem Version](https://badge.fury.io/rb/tmj_formatter.svg)](https://badge.fury.io/rb/tmj_formatter)
 [![Build Status](https://travis-ci.org/automation-wizards/tmj_formatter.svg?branch=master)](https://travis-ci.org/automation-wizards/tmj_formatter)
 [![Coverage Status](https://coveralls.io/repos/github/automation-wizards/tmj_formatter/badge.svg?branch=master)](https://coveralls.io/github/automation-wizards/tmj_formatter?branch=master)

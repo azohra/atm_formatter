@@ -1,3 +1,3 @@
-module TmjFormatter
-  VERSION = "0.0.1"
+module TMJFormatter
+  VERSION = '0.1.0'
 end

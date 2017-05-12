@@ -1,5 +1,9 @@
-require "tmj_formatter/version"
+require 'tmj_ruby'
+require 'rspec'
 
-module TmjFormatter
-  # Your code goes here...
-end
+require 'tmj_formatter/version'
+require_relative 'tmj_formatter/steps'
+require_relative 'tmj_formatter/adapter'
+
+require_relative 'tmj_output_formatter'
+require_relative 'tmj_result_formatter'

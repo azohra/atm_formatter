@@ -1,0 +1,13 @@
+{"executionTime"=>2000,
+  "estimatedTime"=>0,
+  "projectKey"=>"CC",
+  "testCaseCount"=>2,
+  "plannedStartDate"=>"2017-04-21T19:27:52.300Z",
+  "name"=>"test run",
+  "issueCount"=>0,
+  "items"=>
+  [{"testCaseKey"=>"CC-T913", "environment"=>"CHROME - EN - DESKTOP", "userKey"=>"test"},
+  {"testCaseKey"=>"CC-T952", "environment"=>"CHROME - EN - DESKTOP", "userKey"=>"test"}],
+  "plannedEndDate"=>"2017-04-21T19:27:52.301Z",
+  "key"=>"CC-R180",
+  "status"=>"Done"}

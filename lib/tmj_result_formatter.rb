@@ -21,23 +21,24 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
   end
 
   def example_started(notification)
-     if @options[:run_only_found_tests] && !@test_cases.include?(test_id(notification.example))
-       notification.example.metadata[:skip] = true
-     end
+    if @options[:run_only_found_tests] && !@test_cases.include?(test_id(notification.example))
+      notification.example.metadata[:skip] = true
+    end
     notification.example.metadata[:step_index] = 0
   end
 
   def example_passed(notification)
-    post_result(notification.example) if @options[:run_only_found_tests]
+    post_result(notification.example)
   end
 
   def example_failed(notification)
-    post_result(notification.example) if @options[:run_only_found_tests]
+    post_result(notification.example)
   end
 
   private
 
   def post_result(example)
+    return unless @options[:post_results] # example.metadata.key?(:test_id) && !test_id(example).empty?
     if TMJ.config.test_run_id
       response = @client.TestRun.create_new_test_run_result(test_id(example), with_steps(example))
       raise TMJ::TestRunError, response unless response.code == 201
@@ -54,6 +55,7 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
     {
       test_case: test_id(example),
       status: status(example.metadata[:execution_result]),
+      environment: example.metadata.fetch(:environment) { nil },
       comment: comment(example.metadata),
       execution_time: run_time(example.metadata[:execution_result]),
       script_results: steps(example.metadata)
@@ -89,7 +91,7 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
     scenario.run_time.to_i * 1000
   end
 
-  def steps(scenario)  # TODO: Make this better
+  def steps(scenario) # TODO: Make this better
     arr = []
     scenario[:steps].each { |s| arr << s.reject { |k, _v| k == :step_name } }
     arr

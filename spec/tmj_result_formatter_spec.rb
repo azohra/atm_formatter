@@ -1,8 +1,7 @@
 require "spec_helper"
 
 RSpec.describe 'TMJResultFormatter' do
-  it "example", test_id: 'CC-T913s' do |e|
-    pending('message')
+  it "example", test_id: 'CC-T913', environment: 'stuff' do |e|
     e.step 'check version' do
       expect(TMJFormatter::VERSION).not_to be nil
     end

@@ -3,7 +3,7 @@ require 'rspec/core/formatters/base_formatter'
 RSpec.configuration.add_setting :tmj_result_formatter_options, default: {}
 
 class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
-  DEFAULT_PROGRESS_BAR_OPTIONS = { run_only_found_tests: false, post_results: false }.freeze
+  DEFAULT_RESULT_FORMATTER_OPTIONS = { run_only_found_tests: false, post_results: false }.freeze
 
   RSpec::Core::Formatters.register self, :start, :example_started, :example_passed, :example_failed
 
@@ -12,7 +12,7 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
   end
 
   def start(_notification)
-    @options = DEFAULT_PROGRESS_BAR_OPTIONS.merge(RSpec.configuration.tmj_result_formatter_options)
+    @options = DEFAULT_RESULT_FORMATTER_OPTIONS.merge(RSpec.configuration.tmj_result_formatter_options)
     if @options[:run_only_found_tests]
       @client = TMJ::Client.new
       test_run_data = @client.TestRun.find(TMJ.config.test_run_id)
@@ -38,17 +38,19 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
   private
 
   def post_result(example)
-    return unless @options[:post_results] # example.metadata.key?(:test_id) && !test_id(example).empty?
-    if TMJ.config.test_run_id
-      response = @client.TestRun.create_new_test_run_result(test_id(example), with_steps(example))
-      raise TMJ::TestRunError, response unless response.code == 201
-    else
-      response = @client.TestCase.create_new_test_result(example.metadata)
-      raise TMJ::TestCaseError, response unless response.code == 201
+    return unless @options[:post_results]
+    begin
+      if TMJ.config.test_run_id
+        response = @client.TestRun.create_new_test_run_result(test_id(example), with_steps(example))
+        raise TMJ::TestRunError, response unless response.code == 201
+      else
+        response = @client.TestCase.create_new_test_result(example.metadata)
+        raise TMJ::TestCaseError, response unless response.code == 201
+      end
+    rescue => e
+      puts e, e.message
+      exit
     end
-  rescue => e
-    puts e, e.message
-    exit
   end
 
   def with_steps(example) # TODO: Make this better

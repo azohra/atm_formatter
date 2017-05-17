@@ -10,9 +10,15 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
   def start(_notification)
     @options = DEFAULT_RESULT_FORMATTER_OPTIONS.merge(RSpec.configuration.tmj_result_formatter_options)
     if @options[:run_only_found_tests]
-      @client = TMJ::Client.new
-      test_run_data = @client.TestRun.find(TMJ.config.test_run_id)
-      @test_cases = @client.TestCase.retrive_based_on_username(test_run_data, TMJ.config.username.downcase)
+      begin
+        @client = TMJ::Client.new
+        test_run_data = @client.TestRun.find(TMJ.config.test_run_id)
+        raise TMJ::TestRunError, test_run_data unless test_run_data.code == 200
+      rescue => e
+        puts e, e.message
+        exit
+      end
+        @test_cases = @client.TestCase.retrive_based_on_username(test_run_data, TMJ.config.username.downcase)      
     end
   end
 
@@ -57,7 +63,7 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
       comment: comment(example.metadata),
       execution_time: run_time(example.metadata[:execution_result]),
       script_results: steps(example.metadata)
-    }.delete_if { |k, v| v.nil? }
+    }.delete_if { |_k, v| v.nil? }
   end
 
   def without_steps(example) # TODO: Make this better

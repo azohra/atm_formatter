@@ -18,7 +18,7 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
 
   def example_started(notification)
     if @options[:run_only_found_tests] && !@test_cases.include?(test_id(notification.example))
-      notification.example.metadata[:skip] = true
+      notification.example.metadata[:skip] = "#{notification.example.metadata[:test_id]} was not found in the #{TMJ.config.test_run_id} test run."
     end
     notification.example.metadata[:step_index] = 0
   end

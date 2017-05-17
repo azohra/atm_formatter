@@ -7,22 +7,24 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
 
   RSpec::Core::Formatters.register self, :start, :example_started, :example_passed, :example_failed
 
-  def initialize(output)
-    @output = output
-  end
-
   def start(_notification)
     @options = DEFAULT_RESULT_FORMATTER_OPTIONS.merge(RSpec.configuration.tmj_result_formatter_options)
     if @options[:run_only_found_tests]
-      @client = TMJ::Client.new
-      test_run_data = @client.TestRun.find(TMJ.config.test_run_id)
+      begin
+        @client = TMJ::Client.new
+        test_run_data = @client.TestRun.find(TMJ.config.test_run_id)
+        raise TMJ::TestRunError, test_run_data unless test_run_data.code == 200
+      rescue => e
+        puts e, e.message
+        exit
+      end
       @test_cases = @client.TestCase.retrive_based_on_username(test_run_data, TMJ.config.username.downcase)
     end
   end
 
   def example_started(notification)
     if @options[:run_only_found_tests] && !@test_cases.include?(test_id(notification.example))
-      notification.example.metadata[:skip] = true
+      notification.example.metadata[:skip] = "#{notification.example.metadata[:test_id]} was not found in the #{TMJ.config.test_run_id} test run."
     end
     notification.example.metadata[:step_index] = 0
   end
@@ -55,22 +57,30 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
 
   def with_steps(example) # TODO: Make this better
     {
-      test_case: test_id(example),
-      status: status(example.metadata[:execution_result]),
-      environment: example.metadata.fetch(:environment) { nil },
-      comment: comment(example.metadata),
-      execution_time: run_time(example.metadata[:execution_result]),
-      script_results: steps(example.metadata)
-    }
+        test_case: test_id(example),
+        status: status(example.metadata[:execution_result]),
+        environment: fetch_environment(example),
+        comment: comment(example.metadata),
+        execution_time: run_time(example.metadata[:execution_result]),
+        script_results: steps(example.metadata)
+    }.delete_if { |_k, v| v.nil? }
   end
 
   def without_steps(example) # TODO: Make this better
     {
-      test_case: test_id(example),
-      status: status(example.metadata[:execution_result]),
-      comment: comment(example.metadata),
-      execution_time: run_time(example.metadata[:execution_result])
+        test_case: test_id(example),
+        status: status(example.metadata[:execution_result]),
+        comment: comment(example.metadata),
+        execution_time: run_time(example.metadata[:execution_result])
     }
+  end
+
+  def fetch_environment(example)
+    if example.metadata[:environment] && !example.metadata[:environment].empty?
+      example.metadata[:environment]
+    elsif TMJ.config.environment && !TMJ.config.environment.empty?
+      TMJ.config.environment
+    end
   end
 
   def test_id(example)
@@ -101,10 +111,10 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
 
   def status_code(status)
     case status
-    when :failed, :passed then
-      status.to_s.gsub('ed', '').capitalize
-    when :pending then
-      'Blocked'
+      when :failed, :passed then
+        status.to_s.gsub('ed', '').capitalize
+      when :pending then
+        'Blocked'
     end
   end
 end

@@ -32,40 +32,50 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
   end
 
   def example_passed(notification)
-    post_result(notification.example)
+    post_the_right_thing(notification.example) if we_should_post(notification.example)
   end
 
   def example_failed(notification)
-    post_result(notification.example)
+    post_the_right_thing(notification.example) if we_should_post(notification.example)
   end
 
   private
 
-  def post_result(example) # TODO: refactor
-    return unless @options[:post_results]
-    return if test_id(example).empty?
-    begin
-      if TMJFormatter.config.test_run_id && @options[:run_only_found_tests]
-        response = @client.TestRun.create_new_test_run_result(test_id(example), with_steps(example))
-        raise TMJ::TestRunError, response unless response.code == 201
-      else
-        response = @client.TestCase.create_new_test_result(without_steps(example))
-        raise TMJ::TestCaseError, response unless response.code == 200
+  def post_the_right_thing(example)
+    TMJFormatter.config.test_run_id ? post_run_result(example) : post_test_result(example)
+  end
+
+  def we_should_post(example)
+    @options[:post_results] && !test_id(example).strip.empty?
+  end
+
+  def post_run_result(example) # TODO: refactor
+    @client.TestRun.create_new_test_run_result(test_id(example), with_steps(example)).tap do |response|
+      if response.code != 201
+        puts TMJ::TestRunError.new(response).message
+        exit
       end
-    rescue => e
-      puts e, e.message
-      exit
     end
   end
 
+  def post_test_result(example)
+    @client.TestCase.create_new_test_result(without_steps(example)).tap do |response|
+      if response.code != 200
+        puts TMJ::TestRunError.new(response).message
+        exit
+      end
+    end
+  end
+
+
   def with_steps(example) # TODO: Make this better
     {
-      test_case: test_id(example),
-      status: status(example.metadata[:execution_result]),
-      environment: fetch_environment(example),
-      comment: comment(example.metadata),
-      execution_time: run_time(example.metadata[:execution_result]),
-      script_results: steps(example.metadata)
+        test_case: test_id(example),
+        status: status(example.metadata[:execution_result]),
+        environment: fetch_environment(example),
+        comment: comment(example.metadata),
+        execution_time: run_time(example.metadata[:execution_result]),
+        script_results: steps(example.metadata)
     }.delete_if { |_k, v| v.nil? }
   end
 

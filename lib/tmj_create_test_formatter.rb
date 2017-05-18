@@ -37,7 +37,6 @@ class TMJCreateTestFormatter < RSpec::Core::Formatters::BaseFormatter
   end
 
   def process_example(example)
-    binding.pry
   {
         "projectKey": "#{TMJFormatter.config.project_id}",
         "name": "#{example.metadata[:description]}",

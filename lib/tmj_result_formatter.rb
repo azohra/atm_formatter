@@ -1,30 +1,28 @@
 require 'rspec/core/formatters/base_formatter'
 
-RSpec.configuration.add_setting :tmj_result_formatter_options, default: {}
-
 class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
   DEFAULT_RESULT_FORMATTER_OPTIONS = { run_only_found_tests: false, post_results: false }.freeze
 
   RSpec::Core::Formatters.register self, :start, :example_started, :example_passed, :example_failed
 
   def start(_notification)
-    @options = DEFAULT_RESULT_FORMATTER_OPTIONS.merge(RSpec.configuration.tmj_result_formatter_options)
-    @client = TMJ::Client.new
+    @options = DEFAULT_RESULT_FORMATTER_OPTIONS.merge(TMJFormatter.config.result_formatter_options)
+    @client = TMJ::Client.new(TMJFormatter.config.to_hash)
     if @options[:run_only_found_tests]
       begin
-        test_run_data = @client.TestRun.find(TMJ.config.test_run_id)
+        test_run_data = @client.TestRun.find(TMJFormatter.config.test_run_id)
         raise TMJ::TestRunError, test_run_data unless test_run_data.code == 200
       rescue => e
         puts e, e.message
         exit
       end
-        @test_cases = @client.TestCase.retrive_based_on_username(test_run_data, TMJ.config.username.downcase)      
+        @test_cases = @client.TestCase.retrive_based_on_username(test_run_data, TMJFormatter.config.username.downcase)
     end
   end
 
   def example_started(notification)
     if @options[:run_only_found_tests] && !@test_cases.include?(test_id(notification.example))
-      notification.example.metadata[:skip] = "#{notification.example.metadata[:test_id]} was not found in the #{TMJ.config.test_run_id} test run."
+      notification.example.metadata[:skip] = "#{notification.example.metadata[:test_id]} was not found in the #{TMJFormatter.config.test_run_id} test run."
     end
     notification.example.metadata[:step_index] = 0
   end
@@ -43,12 +41,12 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
     return unless @options[:post_results]
     return if test_id(example).empty?
     begin
-      if TMJ.config.test_run_id && @options[:run_only_found_tests]
+      if TMJFormatter.config.test_run_id && @options[:run_only_found_tests]
         response = @client.TestRun.create_new_test_run_result(test_id(example), with_steps(example))
         raise TMJ::TestRunError, response unless response.code == 201
       else
-        response = @client.TestCase.create_new_test_result(example.metadata)
-        raise TMJ::TestCaseError, response unless response.code == 201
+        response = @client.TestCase.create_new_test_result(without_steps(example))
+        raise TMJ::TestCaseError, response unless response.code == 200
       end
     rescue => e
       puts e, e.message
@@ -79,8 +77,8 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
   def fetch_environment(example)
     if example.metadata[:environment] && !example.metadata[:environment].empty?
       example.metadata[:environment]
-    elsif TMJ.config.environment && !TMJ.config.environment.empty?
-      TMJ.config.environment
+    elsif TMJFormatter.config.environment && !TMJFormatter.config.environment.empty?
+      TMJFormatter.config.environment
     end
   end
 

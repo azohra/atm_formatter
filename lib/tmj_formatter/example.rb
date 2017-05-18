@@ -1,5 +1,4 @@
 # TODO: Figure out a better way to patch this
-
 module RSpec
   module Core
     class Example
@@ -59,4 +58,4 @@ module RSpec
       end
     end
   end
-end
+  end

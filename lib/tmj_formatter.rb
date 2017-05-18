@@ -2,6 +2,7 @@ require 'tmj_ruby'
 require 'rspec'
 
 require          'tmj_formatter/version'
+require_relative 'configuration'
 require_relative 'tmj_formatter/steps'
 require_relative 'tmj_formatter/adapter'
 

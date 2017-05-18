@@ -9,9 +9,9 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
 
   def start(_notification)
     @options = DEFAULT_RESULT_FORMATTER_OPTIONS.merge(RSpec.configuration.tmj_result_formatter_options)
+    @client = TMJ::Client.new
     if @options[:run_only_found_tests]
       begin
-        @client = TMJ::Client.new
         test_run_data = @client.TestRun.find(TMJ.config.test_run_id)
         raise TMJ::TestRunError, test_run_data unless test_run_data.code == 200
       rescue => e
@@ -39,10 +39,11 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
 
   private
 
-  def post_result(example)
+  def post_result(example) # TODO: refactor
     return unless @options[:post_results]
+    return if test_id(example).empty?
     begin
-      if TMJ.config.test_run_id
+      if TMJ.config.test_run_id && @options[:run_only_found_tests]
         response = @client.TestRun.create_new_test_run_result(test_id(example), with_steps(example))
         raise TMJ::TestRunError, response unless response.code == 201
       else

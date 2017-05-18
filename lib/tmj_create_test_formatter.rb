@@ -1,19 +1,17 @@
 require 'rspec/core/formatters/base_formatter'
 
-RSpec.configuration.add_setting :tmj_create_test_formatter_options, default: {}
-
 class TMJCreateTestFormatter < RSpec::Core::Formatters::BaseFormatter
   DEFAULT_CREATE_TEST_FORMATTER_OPTIONS = { update_existing_tests: false, test_owner: nil, custom_labels: nil}.freeze
 
   RSpec::Core::Formatters.register self, :start, :example_started
 
   def start(_notification)
-    @options = DEFAULT_CREATE_TEST_FORMATTER_OPTIONS.merge(RSpec.configuration.tmj_create_test_formatter_options)
-    @client = TMJ::Client.new
+    @options = DEFAULT_CREATE_TEST_FORMATTER_OPTIONS.merge(TMJFormatter.config.create_test_formatter_options)
+    @client = TMJ::Client.new(TMJFormatter.config.to_hash)
   end
 
   def example_started(notification)
-    return if notification.example.metadata.has_key?(:test_id) && !notification.example.metadata[:test_id].empty?
+    return if notification.example.metadata.has_key?(:test_id) && !notification.example.metadata[:test_id].empty? || !notification.example.metadata.has_key?(:test_id)
 
     begin
       response = @client.TestCase.create(process_example(notification.example))
@@ -39,8 +37,9 @@ class TMJCreateTestFormatter < RSpec::Core::Formatters::BaseFormatter
   end
 
   def process_example(example)
+    binding.pry
   {
-        "projectKey": "#{TMJ.config.project_id}",
+        "projectKey": "#{TMJFormatter.config.project_id}",
         "name": "#{example.metadata[:description]}",
         "precondition": "#{example.metadata[:precondition]}",
         "owner": "#{@options[:test_owner]}",

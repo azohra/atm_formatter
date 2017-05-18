@@ -14,7 +14,7 @@ TMJFormatter.configure do |c|
   c.environment = "".upcase
   c.username    = 'Test'
   c.password    = 'Test'
-  c.result_formatter_options      = { run_only_found_tests: false, post_results: true }
+  c.result_formatter_options      = { run_only_found_tests: false, post_results: false }
   c.create_test_formatter_options = { update_existing_tests: true, test_owner: 'Test', custom_labels: ['automated'] }
 end
 

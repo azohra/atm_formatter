@@ -16,7 +16,7 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
         puts e, e.message
         exit
       end
-        @test_cases = @client.TestCase.retrive_based_on_username(test_run_data, TMJFormatter.config.username.downcase)
+      @test_cases = @client.TestCase.retrive_based_on_username(test_run_data, TMJFormatter.config.username.downcase)
     end
   end
 
@@ -67,10 +67,10 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
 
   def without_steps(example) # TODO: Make this better
     {
-      test_case: test_id(example),
-      status: status(example.metadata[:execution_result]),
-      comment: comment(example.metadata),
-      execution_time: run_time(example.metadata[:execution_result])
+        test_case: test_id(example),
+        status: status(example.metadata[:execution_result]),
+        comment: comment(example.metadata),
+        execution_time: run_time(example.metadata[:execution_result])
     }
   end
 
@@ -110,10 +110,10 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
 
   def status_code(status)
     case status
-    when :failed, :passed then
-      status.to_s.gsub('ed', '').capitalize
-    when :pending then
-      'Blocked'
+      when :failed, :passed then
+        status.to_s.gsub('ed', '').capitalize
+      when :pending then
+        'Blocked'
     end
   end
 end

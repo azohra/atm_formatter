@@ -24,23 +24,23 @@ Or install it yourself as:
 ## Usage
 
 #### Configuration
+For more information refer to the [wiki](https://github.com/automation-wizards/tmj_formatter/wiki)
 
-Configure `tmj_ruby` (instructions can be found [here](https://github.com/automation-wizards/tmj_ruby))
-
-Add result/output formatter, options and adapter in spec_helper
 ```ruby
-RSpec.configure do |config|
-  config.include TMJFormatter::Adaptor
-  config.formatter = 'TMJResultFormatter'
-  config.formatter = 'TMJOutputFormatter'
-  
-  config.tmj_result_formatter_options = { run_only_found_tests: true, post_results: true }
+TMJFormatter.configure do |c|
+  c.base_url    = 'https://localhost'
+  c.auth_type   = :basic
+  c.project_id  = 'CC'
+  c.test_run_id = 'CC-R180'
+  c.environment = "".upcase
+  c.username    = 'Test'
+  c.password    = 'Test'
+  c.result_formatter_options      = { run_only_found_tests: false, post_results: false }
+  c.create_test_formatter_options = { update_existing_tests: true, 
+                                      test_owner: 'Test', 
+                                      custom_labels: ['automated'] }
 end
 ```
-By default all of the options are set to false.
-`run_only_found_tests` option will force formatter to only run tests from test run.
-`post_results` option enables/disable the ability to post the test results.
-
 
 ## Development
 

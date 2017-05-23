@@ -11,15 +11,13 @@ class TMJCreateTestFormatter < RSpec::Core::Formatters::BaseFormatter
   end
 
   def example_started(notification)
-     if (notification.example.metadata.has_key?(:test_id) && notification.example.metadata[:test_id].strip.empty?) || !notification.example.metadata.has_key?(:test_id)
+    if (notification.example.metadata.has_key?(:test_id) && !notification.example.metadata[:test_id].strip.empty?) || !notification.example.metadata.has_key?(:test_id)
       return
     end
-    
-    begin
-      response = @client.TestCase.create(process_example(notification.example))
-      raise TMJ::TestCaseError, response unless response.code == 201
-    rescue => e
-      puts e, e.message
+
+    response = @client.TestCase.create(process_example(notification.example))
+    if response.code != 201
+      puts TMJ::TestCaseError.new(response).message
       exit
     end
 

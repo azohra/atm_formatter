@@ -7,27 +7,22 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
 
   def start(_notification)
     @options = DEFAULT_RESULT_FORMATTER_OPTIONS.merge(TMJFormatter.config.result_formatter_options)
-
-    client = TMJ::Client.new(TMJFormatter.config.to_hash) # TODO: fix this
+    @client = TMJ::Client.new(TMJFormatter.config.to_hash)
     if @options[:run_only_found_tests]
-      begin
-        test_run_data = client.TestRun.find(TMJFormatter.config.test_run_id)
-
-        raise TMJ::TestRunError, test_run_data unless test_run_data.code == 200
-      rescue => e
-        puts e, e.message
+      test_run_data = @client.TestRun.find(TMJFormatter.config.test_run_id)
+      if test_run_data.code != '200'
+        puts TMJ::TestRunError.new(test_run_data).message
         exit
       end
-      @test_cases = client.TestCase.retrive_based_on_username(test_run_data, TMJFormatter.config.username.downcase)
+      @test_cases = @client.TestCase.retrive_based_on_username(test_run_data, TMJFormatter.config.username.downcase)
     end
   end
 
   def example_started(notification)
-    @client = TMJ::Client.new(TMJFormatter.config.to_hash)# TODO: fix this
-
     if @options[:run_only_found_tests] && !@test_cases.include?(test_id(notification.example))
       notification.example.metadata[:skip] = "#{notification.example.metadata[:test_id]} was not found in the #{TMJFormatter.config.test_run_id} test run."
     end
+
     notification.example.metadata[:step_index] = 0
   end
 
@@ -49,9 +44,9 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
     @options[:post_results] && !test_id(example).strip.empty?
   end
 
-  def post_run_result(example) # TODO: refactor
+  def post_run_result(example)
     @client.TestRun.create_new_test_run_result(test_id(example), with_steps(example)).tap do |response|
-      if response.code != 201
+      if response.code != '201'
         puts TMJ::TestRunError.new(response).message
         exit
       end
@@ -60,31 +55,30 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
 
   def post_test_result(example)
     @client.TestCase.create_new_test_result(without_steps(example)).tap do |response|
-      if response.code != 200
+      if response.code != '200'
         puts TMJ::TestRunError.new(response).message
         exit
       end
     end
   end
 
-
   def with_steps(example) # TODO: Make this better
     {
-        test_case: test_id(example),
-        status: status(example.metadata[:execution_result]),
-        environment: fetch_environment(example),
-        comment: comment(example.metadata),
-        execution_time: run_time(example.metadata[:execution_result]),
-        script_results: steps(example.metadata)
+      test_case: test_id(example),
+      status: status(example.metadata[:execution_result]),
+      environment: fetch_environment(example),
+      comment: comment(example.metadata),
+      execution_time: run_time(example.metadata[:execution_result]),
+      script_results: steps(example.metadata)
     }.delete_if { |_k, v| v.nil? }
   end
 
   def without_steps(example) # TODO: Make this better
     {
-        test_case: test_id(example),
-        status: status(example.metadata[:execution_result]),
-        comment: comment(example.metadata),
-        execution_time: run_time(example.metadata[:execution_result])
+      test_case: test_id(example),
+      status: status(example.metadata[:execution_result]),
+      comment: comment(example.metadata),
+      execution_time: run_time(example.metadata[:execution_result])
     }
   end
 
@@ -124,10 +118,10 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
 
   def status_code(status)
     case status
-      when :failed, :passed then
-        status.to_s.gsub('ed', '').capitalize
-      when :pending then
-        'Blocked'
+    when :failed, :passed then
+      status.to_s.gsub('ed', '').capitalize
+    when :pending then
+      'Blocked'
     end
   end
 end

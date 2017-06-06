@@ -10,7 +10,7 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
     @client = TMJ::Client.new(TMJFormatter.config.to_hash)
     if @options[:run_only_found_tests]
       test_run_data = @client.TestRun.find(TMJFormatter.config.test_run_id)
-      if test_run_data.code != '200'
+      if test_run_data.code != 200
         puts TMJ::TestRunError.new(test_run_data).message
         exit
       end
@@ -46,7 +46,7 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
 
   def post_run_result(example)
     @client.TestRun.create_new_test_run_result(test_id(example), with_steps(example)).tap do |response|
-      if response.code != '201'
+      if response.code != 201
         puts TMJ::TestRunError.new(response).message
         exit
       end
@@ -55,7 +55,7 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
 
   def post_test_result(example)
     @client.TestCase.create_new_test_result(without_steps(example)).tap do |response|
-      if response.code != '200'
+      if response.code != 200
         puts TMJ::TestRunError.new(response).message
         exit
       end
@@ -111,6 +111,7 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
   end
 
   def steps(scenario) # TODO: Make this better
+    return unless scenario[:steps]
     arr = []
     scenario[:steps].each { |s| arr << s.reject { |k, _v| k == :step_name } }
     arr

@@ -4,7 +4,7 @@ class TMJUpdateTestFormatter < TMJFormatter::BaseFormatter
   RSpec::Core::Formatters.register self, *NOTIFICATIONS
 
   def example_started(notification)
-    if (notification.example.metadata.has_key?(:test_id) && notification.example.metadata[:test_id].strip.empty?) || !notification.example.metadata.has_key?(:test_id)
+    if (notification.example.metadata.key?(:test_id) && notification.example.metadata[:test_id].strip.empty?) || !notification.example.metadata.key?(:test_id)
       return
     end
 

@@ -1,6 +1,5 @@
 module TMJFormatter
   module Example
-
     def step(step, _options = {}, &block)
       @metadata[:steps] = [] if @metadata[:steps].nil?
       if RSpec.configuration.dry_run?

@@ -3,7 +3,7 @@ require 'rspec/core/formatters/base_formatter'
 class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
   DEFAULT_RESULT_FORMATTER_OPTIONS = { run_only_found_tests: false, post_results: false }.freeze
 
-  RSpec::Core::Formatters.register self, :start, :example_started, :example_passed, :example_failed
+  RSpec::Core::Formatters.register self, :start, :example_started, :dump_summary, :close
 
   def start(_notification)
     @options = DEFAULT_RESULT_FORMATTER_OPTIONS.merge(TMJFormatter.config.result_formatter_options)
@@ -16,6 +16,40 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
       end
       @test_cases = @client.TestCase.retrive_based_on_username(test_run_data, TMJFormatter.config.username.downcase)
     end
+
+    @test_results = {}
+    @test_data = []
+    Dir.mkdir('test_results') unless Dir.exist?('test_results')
+  end
+
+  def dump_summary(notification)
+    notification.examples.each do |example|
+      file_path = example.metadata[:file_path].match(/[^\/]*_spec/)[0] # "#{}.json"
+      @test_results[file_path.to_sym] = { test_cases: [] }
+      test_data = @client.TestRun.process_result(process_metadata(example))
+      @test_data <<  if TMJFormatter.config.test_run_id
+                       test_data.merge!(test_run_id: TMJFormatter.config.test_run_id, test_case: example.metadata[:test_id], file_path: file_path)
+                     else
+                       test_data.merge!(test_case: example.metadata[:test_case], file_path: file_path)
+                     end
+    end
+
+    @test_results.each do |k, _v|
+      @test_data.each do |test_case_data|
+        if k.to_s == test_case_data[:file_path]
+          test_case_data.delete(:file_path)
+          @test_results[k][:test_cases] << test_case_data
+        end
+      end
+    end
+  end
+
+  def close(_notification)
+    @test_results.each do |key, _value|
+      File.open("test_results/#{key}.json", 'w') do |config|
+        config.puts(JSON.pretty_generate(@test_results[key]))
+      end
+    end
   end
 
   def example_started(notification)
@@ -26,43 +60,9 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
     notification.example.metadata[:step_index] = 0
   end
 
-  def example_passed(notification)
-    post_the_right_thing(notification.example) if we_should_post(notification.example)
-  end
-
-  def example_failed(notification)
-    post_the_right_thing(notification.example) if we_should_post(notification.example)
-  end
-
   private
 
-  def post_the_right_thing(example)
-    TMJFormatter.config.test_run_id ? post_run_result(example) : post_test_result(example)
-  end
-
-  def we_should_post(example)
-    @options[:post_results] && !test_id(example).strip.empty?
-  end
-
-  def post_run_result(example)
-    @client.TestRun.create_new_test_run_result(test_id(example), with_steps(example)).tap do |response|
-      if response.code != 201
-        puts TMJ::TestRunError.new(response).message
-        exit
-      end
-    end
-  end
-
-  def post_test_result(example)
-    @client.TestCase.create_new_test_result(without_steps(example)).tap do |response|
-      if response.code != 200
-        puts TMJ::TestRunError.new(response).message
-        exit
-      end
-    end
-  end
-
-  def with_steps(example) # TODO: Make this better
+  def process_metadata(example)
     {
       test_case: test_id(example),
       status: status(example.metadata[:execution_result]),
@@ -71,15 +71,6 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
       execution_time: run_time(example.metadata[:execution_result]),
       script_results: steps(example.metadata)
     }.delete_if { |_k, v| v.nil? }
-  end
-
-  def without_steps(example) # TODO: Make this better
-    {
-      test_case: test_id(example),
-      status: status(example.metadata[:execution_result]),
-      comment: comment(example.metadata),
-      execution_time: run_time(example.metadata[:execution_result])
-    }
   end
 
   def fetch_environment(example)

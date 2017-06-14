@@ -1,3 +1,3 @@
 module TMJFormatter
-  VERSION = '0.1.22'.freeze
+  VERSION = '0.1.27'.freeze
 end

@@ -53,6 +53,10 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
   end
 
   def example_started(notification)
+    if notification.example.metadata[:environment] || TMJFormatter.config.environment
+      configure_env(notification.example)
+    end
+
     if @options[:run_only_found_tests] && !@test_cases.include?(test_id(notification.example))
       notification.example.metadata[:skip] = "#{notification.example.metadata[:test_id]} was not found in the #{TMJFormatter.config.test_run_id} test run."
     end
@@ -61,6 +65,18 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
   end
 
   private
+
+  def configure_env(example)
+    if (!example.metadata[:environment].nil? && !example.metadata[:environment].strip.empty?) &&
+          (!TMJFormatter.config.environment.nil? && !TMJFormatter.config.environment.strip.empty?)
+      warn("WARNING: Environment is set twice!
+      TMJFormatter.config.environment: #{TMJFormatter.config.environment}
+      Spec: #{example.metadata[:environment]}
+      Will use environment provided by the spec.")
+    elsif example.metadata[:environment].nil? || example.metadata[:environment].strip.empty?
+      example.metadata[:environment] = TMJFormatter.config.environment
+    end
+  end
 
   def process_metadata(example)
     {
@@ -74,9 +90,9 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
   end
 
   def fetch_environment(example)
-    if example.metadata[:environment] && !example.metadata[:environment].empty?
+    if example.metadata[:environment] && !example.metadata[:environment].strip.empty?
       example.metadata[:environment]
-    elsif TMJFormatter.config.environment && !TMJFormatter.config.environment.empty?
+    elsif TMJFormatter.config.environment && !TMJFormatter.config.environment.strip.empty?
       TMJFormatter.config.environment
     end
   end
@@ -89,12 +105,14 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
     status_code(scenario.status)
   end
 
-  def comment(scenario) # TODO: need to be changed
-    if scenario[:kanoah_evidence].nil?
-      "#{scenario[:execution_result].exception.inspect}<br />"
-    else
-      scenario[:kanoah_evidence][:title] + "\n" + scenario[:kanoah_evidence][:path]
-    end
+  def comment(scenario)
+    comment = []
+    return if scenario[:kanoah_evidence].nil? &&
+              scenario[:execution_result].exception.inspect == 'nil'
+    comment << scenario[:execution_result].exception.inspect
+
+    comment << "#{scenario[:kanoah_evidence][:title]}<br />#{scenario[:kanoah_evidence][:path]}" unless scenario[:kanoah_evidence].nil?
+    comment.join('<br />')
   end
 
   def run_time(scenario)

@@ -30,7 +30,7 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
       @test_data <<  if TMJFormatter.config.test_run_id
                        test_data.merge!(test_run_id: TMJFormatter.config.test_run_id, test_case: example.metadata[:test_id], file_path: file_path)
                      else
-                       test_data.merge!(test_case: example.metadata[:test_case], file_path: file_path)
+                       test_data.merge!(test_case: example.metadata[:test_id], file_path: file_path)
                      end
     end
 

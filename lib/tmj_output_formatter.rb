@@ -74,9 +74,9 @@ class TMJOutputFormatter < RSpec::Core::Formatters::BaseTextFormatter
 
   def current_color(status)
     case status
-      when 'Pass' then :success
-      when 'Fail' then :failure
-      else :pending
+    when 'Pass' then :success
+    when 'Fail' then :failure
+    else :pending
     end
   end
 end

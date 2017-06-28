@@ -3,7 +3,7 @@ require 'rspec/core/formatters/base_formatter'
 class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
   DEFAULT_RESULT_FORMATTER_OPTIONS = { run_only_found_tests: false, post_results: false }.freeze
 
-  RSpec::Core::Formatters.register self, :start, :example_started, :example_passed, :example_failed
+  RSpec::Core::Formatters.register self, :start, :example_started, :dump_summary, :close
 
   def start(_notification)
     @options = DEFAULT_RESULT_FORMATTER_OPTIONS.merge(TMJFormatter.config.result_formatter_options)
@@ -16,9 +16,47 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
       end
       @test_cases = @client.TestCase.retrive_based_on_username(test_run_data, TMJFormatter.config.username.downcase)
     end
+
+    @test_results = {}
+    @test_data = []
+    Dir.mkdir('test_results') unless Dir.exist?('test_results')
+  end
+
+  def dump_summary(notification)
+    notification.examples.each do |example|
+      file_path = example.metadata[:file_path].match(/[^\/]*_spec/)[0] # "#{}.json"
+      @test_results[file_path.to_sym] = { test_cases: [] }
+      test_data = @client.TestRun.process_result(process_metadata(example))
+      @test_data <<  if TMJFormatter.config.test_run_id
+                       test_data.merge!(test_run_id: TMJFormatter.config.test_run_id, test_case: example.metadata[:test_id], file_path: file_path)
+                     else
+                       test_data.merge!(test_case: example.metadata[:test_id], file_path: file_path)
+                     end
+    end
+
+    @test_results.each do |k, _v|
+      @test_data.each do |test_case_data|
+        if k.to_s == test_case_data[:file_path]
+          test_case_data.delete(:file_path)
+          @test_results[k][:test_cases] << test_case_data
+        end
+      end
+    end
+  end
+
+  def close(_notification)
+    @test_results.each do |key, _value|
+      File.open("test_results/#{key}.json", 'w') do |config|
+        config.puts(JSON.pretty_generate(@test_results[key]))
+      end
+    end
   end
 
   def example_started(notification)
+    if notification.example.metadata[:environment] || TMJFormatter.config.environment
+      configure_env(notification.example)
+    end
+
     if @options[:run_only_found_tests] && !@test_cases.include?(test_id(notification.example))
       notification.example.metadata[:skip] = "#{notification.example.metadata[:test_id]} was not found in the #{TMJFormatter.config.test_run_id} test run."
     end
@@ -26,43 +64,21 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
     notification.example.metadata[:step_index] = 0
   end
 
-  def example_passed(notification)
-    post_the_right_thing(notification.example) if we_should_post(notification.example)
-  end
-
-  def example_failed(notification)
-    post_the_right_thing(notification.example) if we_should_post(notification.example)
-  end
-
   private
 
-  def post_the_right_thing(example)
-    TMJFormatter.config.test_run_id ? post_run_result(example) : post_test_result(example)
-  end
-
-  def we_should_post(example)
-    @options[:post_results] && !test_id(example).strip.empty?
-  end
-
-  def post_run_result(example)
-    @client.TestRun.create_new_test_run_result(test_id(example), with_steps(example)).tap do |response|
-      if response.code != 201
-        puts TMJ::TestRunError.new(response).message
-        exit
-      end
+  def configure_env(example)
+    if (!example.metadata[:environment].nil? && !example.metadata[:environment].strip.empty?) &&
+          (!TMJFormatter.config.environment.nil? && !TMJFormatter.config.environment.strip.empty?)
+      warn("WARNING: Environment is set twice!
+      TMJFormatter.config.environment: #{TMJFormatter.config.environment}
+      Spec: #{example.metadata[:environment]}
+      Will use environment provided by the spec.")
+    elsif example.metadata[:environment].nil? || example.metadata[:environment].strip.empty?
+      example.metadata[:environment] = TMJFormatter.config.environment
     end
   end
 
-  def post_test_result(example)
-    @client.TestCase.create_new_test_result(without_steps(example)).tap do |response|
-      if response.code != 200
-        puts TMJ::TestRunError.new(response).message
-        exit
-      end
-    end
-  end
-
-  def with_steps(example) # TODO: Make this better
+  def process_metadata(example)
     {
       test_case: test_id(example),
       status: status(example.metadata[:execution_result]),
@@ -73,19 +89,10 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
     }.delete_if { |_k, v| v.nil? }
   end
 
-  def without_steps(example) # TODO: Make this better
-    {
-      test_case: test_id(example),
-      status: status(example.metadata[:execution_result]),
-      comment: comment(example.metadata),
-      execution_time: run_time(example.metadata[:execution_result])
-    }
-  end
-
   def fetch_environment(example)
-    if example.metadata[:environment] && !example.metadata[:environment].empty?
+    if example.metadata[:environment] && !example.metadata[:environment].strip.empty?
       example.metadata[:environment]
-    elsif TMJFormatter.config.environment && !TMJFormatter.config.environment.empty?
+    elsif TMJFormatter.config.environment && !TMJFormatter.config.environment.strip.empty?
       TMJFormatter.config.environment
     end
   end
@@ -98,12 +105,14 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
     status_code(scenario.status)
   end
 
-  def comment(scenario) # TODO: need to be changed
-    if scenario[:kanoah_evidence].nil?
-      "#{scenario[:execution_result].exception.inspect}<br />"
-    else
-      scenario[:kanoah_evidence][:title] + "\n" + scenario[:kanoah_evidence][:path]
-    end
+  def comment(scenario)
+    comment = []
+    return if scenario[:kanoah_evidence].nil? &&
+              scenario[:execution_result].exception.inspect == 'nil'
+    comment << scenario[:execution_result].exception.inspect
+
+    comment << "#{scenario[:kanoah_evidence][:title]}<br />#{scenario[:kanoah_evidence][:path]}" unless scenario[:kanoah_evidence].nil?
+    comment.join('<br />')
   end
 
   def run_time(scenario)

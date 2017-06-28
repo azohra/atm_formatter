@@ -51,7 +51,7 @@ module TMJ
                   client.TestRun.create_new_test_run_result(test_run_id, test_case_id, test_case.to_json)
                   progressbar.increment
                 else
-                  warn('Have run against test run')
+                  warn('Have to run against test run')
                 end
               end
             end

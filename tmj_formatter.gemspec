@@ -29,4 +29,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rake',      '~> 12.0'
   spec.add_development_dependency 'coveralls', '~> 0.8.20'
   spec.add_development_dependency 'pry',       '~> 0.10.4'
+  spec.add_development_dependency 'guard-rspec', '~> 4.7', '>= 4.7.3'
 end

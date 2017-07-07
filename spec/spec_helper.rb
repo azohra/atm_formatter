@@ -1,10 +1,17 @@
+require 'simplecov'
 require 'coveralls'
+
+SimpleCov.formatter = Coveralls::SimpleCov::Formatter
+SimpleCov.start do
+  add_filter 'spec/support'
+end
+
 Coveralls.wear!
 
 require 'bundler/setup'
 require 'tmj_formatter'
 require 'pry'
-
+require 'support/formatter_support'
 
 TMJFormatter.configure do |c|
   c.base_url    = 'https://localhost'
@@ -22,11 +29,15 @@ RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
   config.example_status_persistence_file_path = '.rspec_status'
   config.include TMJFormatter::Adaptor
-  config.formatter = 'TMJResultFormatter' unless RSpec.configuration.dry_run?
+  # config.formatter = 'TMJResultFormatter' unless RSpec.configuration.dry_run?
   config.formatter = 'TMJOutputFormatter'
 
   config.expect_with :rspec do |c|
     c.syntax = :expect
+  end
+
+  config.around(:example, :nrf) do |e|
+    config.formatter = 'TMJResultFormatter'
   end
 end
 

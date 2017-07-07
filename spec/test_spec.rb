@@ -2,7 +2,7 @@ require 'spec_helper'
 
 PRECONDITION = 'PROVIDE SOME DATA HERE'.freeze
 OBJECTIVE    = 'JUST A TEST'.freeze
-RSpec.describe 'Test Case:', folder: '/Test' do
+RSpec.describe 'Test Case:', folder: '/Test', 'nrf' => true, skip: true do
   it 'Test Example From Local', objective: OBJECTIVE, precondition: PRECONDITION, test_id: 'CC-T1613' do |e|
     e.step 'test 1' do
     end
@@ -20,3 +20,6 @@ RSpec.describe 'Test Case:', folder: '/Test' do
     end
   end
 end
+
+
+

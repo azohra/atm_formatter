@@ -17,6 +17,7 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
       @test_cases = @client.TestCase.retrive_based_on_username(test_run_data, TMJFormatter.config.username.downcase)
     end
 
+    @time_stamp = Time.now.to_i.to_s
     @test_results = {}
     @test_data = []
     Dir.mkdir('test_results') unless Dir.exist?('test_results')
@@ -24,7 +25,8 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
 
   def dump_summary(notification)
     notification.examples.each do |example|
-      file_path = example.metadata[:file_path].match(/[^\/]*_spec/)[0] # "#{}.json"
+      file_name = example.metadata[:file_path].match(/[^\/]*_spec/)[0] # "#{}.json"
+      file_path = "#{file_name}_#{@time_stamp}"
       @test_results[file_path.to_sym] = { test_cases: [] }
       test_data = @client.TestRun.process_result(process_metadata(example))
       @test_data <<  if TMJFormatter.config.test_run_id

@@ -17,7 +17,7 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
       @test_cases = @client.TestCase.retrive_based_on_username(test_run_data, TMJFormatter.config.username.downcase)
     end
 
-    @time_stamp = Time.now.to_i.to_s
+    @time_stamp = "#{Time.now.to_i.to_s}-#{rand(10**10)}"
     @test_results = {}
     @test_data = []
     Dir.mkdir('test_results') unless Dir.exist?('test_results')

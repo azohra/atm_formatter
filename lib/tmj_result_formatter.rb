@@ -133,7 +133,7 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
     when :failed, :passed then
       status.to_s.gsub('ed', '').capitalize
     when :pending then
-      'Blocked'
+      'Not Supported'
     end
   end
 end

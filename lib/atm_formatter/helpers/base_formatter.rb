@@ -1,13 +1,13 @@
 require 'rspec/core/formatters/base_formatter'
-module TMJFormatter
+module ATMFormatter
 class BaseFormatter < RSpec::Core::Formatters::BaseFormatter
   DEFAULT_OPTIONS = { update_existing_tests: false, test_owner: nil, custom_labels: nil}.freeze
 
   NOTIFICATIONS = %i[start, example_started].freeze
 
   def start(_notification)
-    @options = DEFAULT_OPTIONS.merge(TMJFormatter.config.create_test_formatter_options)
-    @client = TMJ::Client.new(TMJFormatter.config.to_hash)
+    @options = DEFAULT_OPTIONS.merge(ATMFormatter.config.create_test_formatter_options)
+    @client = ATM::Client.new(ATMFormatter.config.to_hash)
   end
 
   private
@@ -29,7 +29,7 @@ class BaseFormatter < RSpec::Core::Formatters::BaseFormatter
 
 
   def configure_project_key
-    self.class.to_s == 'TMJUpdateTestFormatter' ? nil : TMJFormatter.config.project_id
+    self.class.to_s == 'ATMUpdateTestFormatter' ? nil : ATMFormatter.config.project_id
   end
 
   def process_steps(example)

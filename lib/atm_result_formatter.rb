@@ -1,20 +1,20 @@
 require 'rspec/core/formatters/base_formatter'
 
-class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
+class ATMResultFormatter < RSpec::Core::Formatters::BaseFormatter
   DEFAULT_RESULT_FORMATTER_OPTIONS = { run_only_found_tests: false, post_results: false }.freeze
 
   RSpec::Core::Formatters.register self, :start, :example_started, :dump_summary, :close
 
   def start(_notification)
-    @options = DEFAULT_RESULT_FORMATTER_OPTIONS.merge(TMJFormatter.config.result_formatter_options)
-    @client = TMJ::Client.new(TMJFormatter.config.to_hash)
+    @options = DEFAULT_RESULT_FORMATTER_OPTIONS.merge(ATMFormatter.config.result_formatter_options)
+    @client = ATM::Client.new(ATMFormatter.config.to_hash)
     if @options[:run_only_found_tests]
-      test_run_data = @client.TestRun.find(TMJFormatter.config.test_run_id)
+      test_run_data = @client.TestRun.find(ATMFormatter.config.test_run_id)
       if test_run_data.code != 200
-        puts TMJ::TestRunError.new(test_run_data).message
+        puts ATM::TestRunError.new(test_run_data).message
         exit
       end
-      @test_cases = @client.TestCase.retrive_based_on_username(test_run_data, TMJFormatter.config.username.downcase)
+      @test_cases = @client.TestCase.retrive_based_on_username(test_run_data, ATMFormatter.config.username.downcase)
     end
 
     @time_stamp = "#{Time.now.to_i.to_s}-#{rand(10**10)}"
@@ -29,8 +29,8 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
       file_path = "#{file_name}_#{@time_stamp}"
       @test_results[file_path.to_sym] = { test_cases: [] }
       test_data = @client.TestRun.process_result(process_metadata(example))
-      @test_data <<  if TMJFormatter.config.test_run_id
-                       test_data.merge!(test_run_id: TMJFormatter.config.test_run_id, test_case: example.metadata[:test_id], file_path: file_path)
+      @test_data <<  if ATMFormatter.config.test_run_id
+                       test_data.merge!(test_run_id: ATMFormatter.config.test_run_id, test_case: example.metadata[:test_id], file_path: file_path)
                      else
                        test_data.merge!(test_case: example.metadata[:test_id], file_path: file_path)
                      end
@@ -55,12 +55,12 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
   end
 
   def example_started(notification)
-    if notification.example.metadata[:environment] || TMJFormatter.config.environment
+    if notification.example.metadata[:environment] || ATMFormatter.config.environment
       configure_env(notification.example)
     end
 
     if @options[:run_only_found_tests] && !@test_cases.include?(test_id(notification.example))
-      notification.example.metadata[:skip] = "#{notification.example.metadata[:test_id]} was not found in the #{TMJFormatter.config.test_run_id} test run."
+      notification.example.metadata[:skip] = "#{notification.example.metadata[:test_id]} was not found in the #{ATMFormatter.config.test_run_id} test run."
     end
 
     notification.example.metadata[:step_index] = 0
@@ -70,13 +70,13 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
 
   def configure_env(example)
     if (!example.metadata[:environment].nil? && !example.metadata[:environment].strip.empty?) &&
-          (!TMJFormatter.config.environment.nil? && !TMJFormatter.config.environment.strip.empty?)
+          (!ATMFormatter.config.environment.nil? && !ATMFormatter.config.environment.strip.empty?)
       warn("WARNING: Environment is set twice!
-      TMJFormatter.config.environment: #{TMJFormatter.config.environment}
+      ATMFormatter.config.environment: #{ATMFormatter.config.environment}
       Spec: #{example.metadata[:environment]}
       Will use environment provided by the spec.")
     elsif example.metadata[:environment].nil? || example.metadata[:environment].strip.empty?
-      example.metadata[:environment] = TMJFormatter.config.environment
+      example.metadata[:environment] = ATMFormatter.config.environment
     end
   end
 
@@ -94,8 +94,8 @@ class TMJResultFormatter < RSpec::Core::Formatters::BaseFormatter
   def fetch_environment(example)
     if example.metadata[:environment] && !example.metadata[:environment].strip.empty?
       example.metadata[:environment]
-    elsif TMJFormatter.config.environment && !TMJFormatter.config.environment.strip.empty?
-      TMJFormatter.config.environment
+    elsif ATMFormatter.config.environment && !ATMFormatter.config.environment.strip.empty?
+      ATMFormatter.config.environment
     end
   end
 

@@ -1,4 +1,4 @@
-module TMJFormatter
+module ATMFormatter
   module Example
     def step(step, _options = {}, &block)
       @metadata[:steps] = [] if @metadata[:steps].nil?

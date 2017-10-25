@@ -1,4 +1,4 @@
-module TMJFormatter
+module ATMFormatter
   class << self
     attr_accessor :config
   end

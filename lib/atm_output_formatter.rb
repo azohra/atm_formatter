@@ -1,6 +1,6 @@
 require 'rspec/core/formatters/base_text_formatter'
 
-class TMJOutputFormatter < RSpec::Core::Formatters::BaseTextFormatter
+class ATMOutputFormatter < RSpec::Core::Formatters::BaseTextFormatter
   RSpec::Core::Formatters.register self, :example_group_started, :example_group_finished,
                                    :example_passed, :example_pending, :example_failed, :example_started
 

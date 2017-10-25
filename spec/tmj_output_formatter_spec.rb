@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe 'TMJOutputFormatter', skip: true do
+RSpec.describe 'ATMOutputFormatter', skip: true do
   it 'TODO' do |e|
   end
 end

@@ -1,6 +1,6 @@
-require_relative 'tmj_formatter/helpers/base_formatter'
+require_relative 'atm_formatter/helpers/base_formatter'
 
-class TMJCreateTestFormatter < TMJFormatter::BaseFormatter
+class ATMCreateTestFormatter < ATMFormatter::BaseFormatter
   RSpec::Core::Formatters.register self, *NOTIFICATIONS
 
   def example_started(notification)
@@ -10,7 +10,7 @@ class TMJCreateTestFormatter < TMJFormatter::BaseFormatter
 
     response = @client.TestCase.create(process_example(notification.example))
     if response.code != 201
-      puts TMJ::TestCaseError.new(response).message
+      puts ATM::TestCaseError.new(response).message
       exit
     end
 

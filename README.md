@@ -1,16 +1,16 @@
-# Rspec Formatter For Test Managemt For JIRA 
-[![Gem Version](https://badge.fury.io/rb/tmj_formatter.svg)](https://badge.fury.io/rb/tmj_formatter)
-[![Build Status](https://travis-ci.org/automation-wizards/tmj_formatter.svg?branch=master)](https://travis-ci.org/automation-wizards/tmj_formatter)
-[![Coverage Status](https://coveralls.io/repos/github/automation-wizards/tmj_formatter/badge.svg?branch=master)](https://coveralls.io/github/automation-wizards/tmj_formatter?branch=master)
-[![Inline docs](http://inch-ci.org/github/automation-wizards/tmj_formatter.svg?branch=master)](http://inch-ci.org/github/automation-wizards/tmj_formatter)
-[![Dependency Status](https://gemnasium.com/badges/github.com/automation-wizards/tmj_formatter.svg)](https://gemnasium.com/github.com/automation-wizards/tmj_formatter)
+# Rspec Formatter For Adaptavist Test Management 
+[![Gem Version](https://badge.fury.io/rb/atm_formatter.svg)](https://badge.fury.io/rb/atm_formatter)
+[![Build Status](https://travis-ci.org/automation-wizards/atm_formatter.svg?branch=master)](https://travis-ci.org/automation-wizards/atm_formatter)
+[![Coverage Status](https://coveralls.io/repos/github/automation-wizards/atm_formatter/badge.svg?branch=master)](https://coveralls.io/github/automation-wizards/atm_formatter?branch=master)
+[![Inline docs](http://inch-ci.org/github/automation-wizards/atm_formatter.svg?branch=master)](http://inch-ci.org/github/automation-wizards/atm_formatter)
+[![Dependency Status](https://gemnasium.com/badges/github.com/automation-wizards/atm_formatter.svg)](https://gemnasium.com/github.com/automation-wizards/atm_formatter)
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'tmj_formatter'
+gem 'atm_formatter'
 ```
 
 And then execute:
@@ -19,15 +19,15 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install tmj_formatter
+    $ gem install atm_formatter
 
 ## Usage
 
 #### Configuration
-For more information refer to the [wiki](https://github.com/automation-wizards/tmj_formatter/wiki)
+For more information refer to the [wiki](https://github.com/automation-wizards/atm_formatter/wiki)
 
 ```ruby
-TMJFormatter.configure do |c|
+ATMFormatter.configure do |c|
   c.base_url    = 'https://localhost'
   c.auth_type   = :basic
   c.project_id  = 'CC'
@@ -50,7 +50,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/tmj_formatter. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
+Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/atm_formatter. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
 
 ## License

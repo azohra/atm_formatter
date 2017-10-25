@@ -1,8 +1,8 @@
 require 'rake'
-require 'tmj_ruby'
+require 'atm_ruby'
 require 'ruby-progressbar'
 
-module TMJ
+module ATM
   class CreateTestFormatter
     include Rake::DSL if defined? Rake::DSL
     class << self
@@ -12,30 +12,30 @@ module TMJ
     end
 
     def install
-      namespace 'tmj' do
-        desc 'Create test cases with steps on Test Managment For JIRA'
+      namespace 'atm' do
+        desc 'Create test cases with steps on Adaptavist Test Management'
         task :create_with_steps, [:path] do |_t, args|
-          exec("bundle exec rspec #{args[:path] if args[:path]} --format TMJCreateTestFormatter --dry-run -r tmj_formatter/example")
+          exec("bundle exec rspec #{args[:path] if args[:path]} --format ATMCreateTestFormatter --dry-run -r atm_formatter/example")
         end
 
-        desc 'Create test cases on Test Managment For JIRA'
+        desc 'Create test cases on Adaptavist Test Management'
         task :create, [:path] do |_t, args|
-          exec("bundle exec rspec #{args[:path] if args[:path]} --format TMJCreateTestFormatter --dry-run")
+          exec("bundle exec rspec #{args[:path] if args[:path]} --format ATMCreateTestFormatter --dry-run")
         end
 
-        desc 'Update test cases with steps on Test Managment For JIRA'
+        desc 'Update test cases with steps on Adaptavist Test Management'
         task :update_with_steps, [:path] do |_t, args|
-          exec("bundle exec rspec #{args[:path] if args[:path]} --format TMJUpdateTestFormatter --dry-run -r tmj_formatter/example")
+          exec("bundle exec rspec #{args[:path] if args[:path]} --format ATMUpdateTestFormatter --dry-run -r atm_formatter/example")
         end
 
-        desc 'Update test cases on Test Managment For JIRA'
+        desc 'Update test cases on Adaptavist Test Management'
         task :update, [:path] do |_t, args|
-          exec("bundle exec rspec #{args[:path] if args[:path]} --format TMJUpdateTestFormatter --dry-run")
+          exec("bundle exec rspec #{args[:path] if args[:path]} --format ATMUpdateTestFormatter --dry-run")
         end
 
         desc 'Upload saved test results'
         task :upload, %i[url username password file_path] do |_t, args|
-          client = TMJ::Client.new(base_url: args[:url], username: args[:username], password: args[:password], auth_type: :basic)
+          client = ATM::Client.new(base_url: args[:url], username: args[:username], password: args[:password], auth_type: :basic)
           files = args[:file_path] ? Dir.glob(args[:file_path]) : Dir.glob('test_results/*.json')
 
           files.each do |my_text_file|
@@ -61,4 +61,4 @@ module TMJ
     end
   end
 end
-TMJ::CreateTestFormatter.install_tasks
+ATM::CreateTestFormatter.install_tasks

@@ -48,7 +48,7 @@ module ATM
                 test_case_id = test_case.delete('test_case') if test_run_id
 
                 if test_run_id
-                  client.TestRun.create_new_test_run_result(test_run_id, test_case_id, test_case.to_json)
+                  client.TestRun.create_new_test_run_result(test_run_id, test_case_id, test_case)
                   progressbar.increment
                 else
                   warn('Have to run against test run')

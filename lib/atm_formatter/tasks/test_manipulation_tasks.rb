@@ -26,7 +26,7 @@ module ATM
         desc 'Update test cases with steps on Adaptavist Test Management'
         task :update_with_steps, [:path] do |_t, args|
           exec("bundle exec rspec #{args[:path] if args[:path]} --format ATMUpdateTestFormatter --dry-run -r atm_formatter/example")
-        end
+        en
 
         desc 'Update test cases on Adaptavist Test Management'
         task :update, [:path] do |_t, args|

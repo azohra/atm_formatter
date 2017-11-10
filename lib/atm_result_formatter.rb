@@ -39,11 +39,11 @@ class ATMResultFormatter < RSpec::Core::Formatters::BaseFormatter
                     end
     end
 
-    @test_results.each do |k, _v|
+    @test_results.each do |key, _value|
       @test_data.each do |test_case_data|
-        if k.to_s == test_case_data[:file_path]
+        if key.to_s == test_case_data[:file_path]
           test_case_data.delete(:file_path)
-          @test_results[k][:test_cases] << test_case_data
+          @test_results[key][:test_cases] << test_case_data
         end
       end
     end

@@ -26,7 +26,7 @@ module ATM
         desc 'Update test cases with steps on Adaptavist Test Management'
         task :update_with_steps, [:path] do |_t, args|
           exec("bundle exec rspec #{args[:path] if args[:path]} --format ATMUpdateTestFormatter --dry-run -r atm_formatter/example")
-        en
+        end
 
         desc 'Update test cases on Adaptavist Test Management'
         task :update, [:path] do |_t, args|
@@ -48,7 +48,27 @@ module ATM
                 test_case_id = test_case.delete('test_case') if test_run_id
 
                 if test_run_id
-                  client.TestRun.create_new_test_run_result(test_run_id, test_case_id, test_case)
+                    retries = 0
+                  begin
+                    client.TestRun.create_new_test_run_result(test_run_id, test_case_id, test_case)
+                  rescue TMJ::TestRunError => e
+                    if e.message.include?("No test execution found on test run")
+                      puts "Test #{test_case_id} is not part of run #{test_run_id}"
+                      next
+                    elsif e.message.include?("No Test Run has been found with the given key.")
+                      next
+                    elsif e.message.include?("was not found for field environment on project CC")
+                      next
+                    elsif retries < 2
+                      retries += 1
+                      puts "error uploading result, retrying in #{2 ** retries}"
+                      sleep 2 ** retries
+                      retry
+                    else
+                      puts "Failed to upload: #{test_case_id}"
+                      next
+                    end
+                  end
                   progressbar.increment
                 else
                   warn('Have to run against test run')

@@ -51,7 +51,7 @@ module ATM
                     retries = 0
                   begin
                     client.TestRun.create_new_test_run_result(test_run_id, test_case_id, test_case)
-                  rescue TMJ::TestRunError => e
+                  rescue ATM::TestRunError => e
                     if e.message.include?("No test execution found on test run")
                       puts "Test #{test_case_id} is not part of run #{test_run_id}"
                       next

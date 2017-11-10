@@ -11,7 +11,7 @@ ATMFormatter.configure do |c|
   c.auth_type   = :basic
   c.project_id  = 'CC'
   c.test_run_id = 'CC-R180'
-  c.environment = "".upcase
+  c.environment = ''
   c.username    = 'Test'
   c.password    = 'Test'
   c.result_formatter_options      = { run_only_found_tests: false, post_results: false }
@@ -29,4 +29,3 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 end
-

@@ -29,11 +29,14 @@ class ATMResultFormatter < RSpec::Core::Formatters::BaseFormatter
       file_path = "#{file_name}_#{@time_stamp}"
       @test_results[file_path.to_sym] = { test_cases: [] }
       test_data = @client.TestRun.process_result(process_metadata(example))
-      @test_data <<  if ATMFormatter.config.test_run_id
-                       test_data.merge!(test_run_id: ATMFormatter.config.test_run_id, test_case: example.metadata[:test_id], file_path: file_path)
-                     else
-                       test_data.merge!(test_case: example.metadata[:test_id], file_path: file_path)
-                     end
+      @test_data << if ATMFormatter.config.test_run_id
+                      test_data.merge!(test_run_id: ATMFormatter.config.test_run_id,
+                                       test_case_id: example.metadata[:test_id],
+                                       file_path: file_path)
+                    else
+                      test_data.merge!(test_case_id: example.metadata[:test_id],
+                                       file_path: file_path)
+                    end
     end
 
     @test_results.each do |k, _v|
@@ -82,7 +85,7 @@ class ATMResultFormatter < RSpec::Core::Formatters::BaseFormatter
 
   def process_metadata(example)
     {
-      test_case: test_id(example),
+      test_case_id: test_id(example),
       status: status(example.metadata[:execution_result]),
       environment: fetch_environment(example),
       comment: comment(example.metadata),

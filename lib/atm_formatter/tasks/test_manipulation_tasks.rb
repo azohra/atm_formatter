@@ -45,9 +45,9 @@ module ATM
               progressbar = ProgressBar.create(total: file_data['test_cases'].size, format: 'Progress %c/%C |%B| %a')
               file_data['test_cases'].each do |test_data|
                 test_run_id = test_data.delete('test_run_id')
+                test_case_id = test_data.delete('test_case_id')
 
                 if test_run_id
-                  test_case_id = test_data.delete('test_case_id')
                   client.TestRun.create_new_test_run_result(test_run_id, test_case_id, test_data)
                   progressbar.increment
                 else
